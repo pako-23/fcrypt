@@ -1,0 +1,4 @@
+#ifndef CRYPT_RAND_H_INCLUDED
+#define CRYPT_RAND_H_INCLUDED
+
+#endif
