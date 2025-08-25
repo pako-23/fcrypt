@@ -4,50 +4,55 @@
 
 START_TEST(simple_call)
 {
-    unsigned char buf[16] = {0};
-    unsigned char zbuf[16] = {0};
+	unsigned char buf[16];
+	unsigned char zbuf[16];
 
-    ck_assert_int_eq(cr_rand_bytes(buf, 16), 0);
-    ck_assert_mem_ne(buf, zbuf, 16);
+	memset(buf, 0, 16);
+	memset(zbuf, 0, 16);
+	ck_assert_int_eq(cr_rand_bytes(buf, 16), 0);
+	ck_assert_mem_ne(buf, zbuf, 16);
 }
-END_TEST
 
-START_TEST(longer_buf)
+END_TEST START_TEST(longer_buf)
 {
-    unsigned char buf[32] = {0};
-    unsigned char zbuf[16] = {0};
+	unsigned char buf[32];
+	unsigned char zbuf[16];
 
-    ck_assert_int_eq(cr_rand_bytes(buf, 16), 0);
-    ck_assert_mem_ne(buf, zbuf, 16);
-    ck_assert_mem_eq(buf + 16, zbuf, 16);
+	memset(buf, 0, 32);
+	memset(zbuf, 0, 16);
+	ck_assert_int_eq(cr_rand_bytes(buf, 16), 0);
+	ck_assert_mem_ne(buf, zbuf, 16);
+	ck_assert_mem_eq(buf + 16, zbuf, 16);
 }
-END_TEST
 
-START_TEST(uniqueness)
+END_TEST START_TEST(uniqueness)
 {
-    unsigned char buf1[52] = {0};
-    unsigned char buf2[52] = {0};
-    unsigned char zbuf[52] = {0};
+	unsigned char buf1[52];
+	unsigned char buf2[52];
+	unsigned char zbuf[52];
 
-    ck_assert_int_eq(cr_rand_bytes(buf1, 52), 0);
-    ck_assert_int_eq(cr_rand_bytes(buf2, 52), 0);
-    ck_assert_mem_ne(buf1, zbuf, 52);
-    ck_assert_mem_ne(buf2, zbuf, 52);
-    ck_assert_mem_ne(buf1, buf2, 52);
+	memset(buf1, 0, 52);
+	memset(buf2, 0, 52);
+	memset(zbuf, 0, 52);
+	ck_assert_int_eq(cr_rand_bytes(buf1, 52), 0);
+	ck_assert_int_eq(cr_rand_bytes(buf2, 52), 0);
+	ck_assert_mem_ne(buf1, zbuf, 52);
+	ck_assert_mem_ne(buf2, zbuf, 52);
+	ck_assert_mem_ne(buf1, buf2, 52);
 }
-END_TEST
 
-START_TEST(zero_len)
+END_TEST START_TEST(zero_len)
 {
-    unsigned char buf[10] = {0};
-    unsigned char zbuf[10] = {0};
+	unsigned char buf[10];
+	unsigned char zbuf[10];
 
-    ck_assert_int_eq(cr_rand_bytes(buf, 0), 0);
-    ck_assert_mem_eq(buf, zbuf, 10);
+	memset(buf, 0, 10);
+	memset(zbuf, 0, 10);
+	ck_assert_int_eq(cr_rand_bytes(buf, 0), 0);
+	ck_assert_mem_eq(buf, zbuf, 10);
 }
-END_TEST
 
-Suite *hashset_suite(void)
+END_TEST Suite *hashset_suite(void)
 {
 	Suite *s;
 	TCase *tc_core;
@@ -56,12 +61,12 @@ Suite *hashset_suite(void)
 
 	tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_core, simple_call);
-    tcase_add_test(tc_core, longer_buf);
-    tcase_add_test(tc_core, uniqueness);
-    tcase_add_test(tc_core, zero_len);
+	tcase_add_test(tc_core, simple_call);
+	tcase_add_test(tc_core, longer_buf);
+	tcase_add_test(tc_core, uniqueness);
+	tcase_add_test(tc_core, zero_len);
 
-    suite_add_tcase(s, tc_core);
+	suite_add_tcase(s, tc_core);
 
 	return s;
 }
