@@ -14,7 +14,7 @@ be using for our implementations.
 
 On Unix-like systems, a possible approach is reading bytes from the
 `/dev/urandom` file. In this first step, try implementing the
-interface defined int he `src/crypt/include/crypt/rand.h` file.
+interface declared in the `src/crypt/include/crypt/rand.h` file.
 
 The implementation must be inserted into the `src/crypt/rand.c` file.
 The `cr_rand_bytes` function must read `len` bytes from the
