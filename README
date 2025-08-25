@@ -1,1 +1,11 @@
-# Java Agent
+README
+
+  Fcrypt is a small command line tool for encrypting files.
+
+GIT
+
+  To download the latest source code off the GIT server, do this:
+
+    git clone https://github.com/pako-23/fcrypt.git
+
+  (you will get a directory named fcrypt created, filled with the source code)
