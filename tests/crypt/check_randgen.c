@@ -1,11 +1,51 @@
 #include <check.h>
 #include <stdlib.h>
+#include <crypt/rand.h>
 
-START_TEST(initial_test)
+START_TEST(simple_call)
 {
+    unsigned char buf[16] = {0};
+    unsigned char zbuf[16] = {0};
+
+    ck_assert_int_eq(cr_rand_bytes(buf, 16), 0);
+    ck_assert_mem_ne(buf, zbuf, 16);
 }
 END_TEST
 
+START_TEST(longer_buf)
+{
+    unsigned char buf[32] = {0};
+    unsigned char zbuf[16] = {0};
+
+    ck_assert_int_eq(cr_rand_bytes(buf, 16), 0);
+    ck_assert_mem_ne(buf, zbuf, 16);
+    ck_assert_mem_eq(buf + 16, zbuf, 16);
+}
+END_TEST
+
+START_TEST(uniqueness)
+{
+    unsigned char buf1[52] = {0};
+    unsigned char buf2[52] = {0};
+    unsigned char zbuf[52] = {0};
+
+    ck_assert_int_eq(cr_rand_bytes(buf1, 52), 0);
+    ck_assert_int_eq(cr_rand_bytes(buf2, 52), 0);
+    ck_assert_mem_ne(buf1, zbuf, 52);
+    ck_assert_mem_ne(buf2, zbuf, 52);
+    ck_assert_mem_ne(buf1, buf2, 52);
+}
+END_TEST
+
+START_TEST(zero_len)
+{
+    unsigned char buf[10] = {0};
+    unsigned char zbuf[10] = {0};
+
+    ck_assert_int_eq(cr_rand_bytes(buf, 0), 0);
+    ck_assert_mem_eq(buf, zbuf, 10);
+}
+END_TEST
 
 Suite *hashset_suite(void)
 {
@@ -16,7 +56,10 @@ Suite *hashset_suite(void)
 
 	tc_core = tcase_create("Core");
 
-	tcase_add_test(tc_core, initial_test);
+    tcase_add_test(tc_core, simple_call);
+    tcase_add_test(tc_core, longer_buf);
+    tcase_add_test(tc_core, uniqueness);
+    tcase_add_test(tc_core, zero_len);
 
     suite_add_tcase(s, tc_core);
 
