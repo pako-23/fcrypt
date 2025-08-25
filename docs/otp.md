@@ -30,4 +30,3 @@ bytes of `key`. I must write the result in `out`.
 
 Once you finished your implementation, the `check_otp` testsuite
 should be passing.
-
