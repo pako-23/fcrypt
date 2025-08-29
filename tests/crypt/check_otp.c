@@ -154,7 +154,7 @@ END_TEST Suite *hashset_suite(void)
 	Suite *s;
 	TCase *tc_core;
 
-	s = suite_create("RandGen");
+	s = suite_create("OneTimePad");
 
 	tc_core = tcase_create("Core");
 
