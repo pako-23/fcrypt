@@ -7,13 +7,13 @@
 struct cr_bcphr_s;
 
 struct cr_bcphr_ops_s {
-    size_t (*blkencrypt)(struct cr_bcphr_s *, uint8_t *);
-    size_t (*blkdecrypt)(struct cr_bcphr_s *, uint8_t *);
+	size_t (*blkencrypt)(struct cr_bcphr_s *, uint8_t *);
+	size_t (*blkdecrypt)(struct cr_bcphr_s *, uint8_t *);
 };
 
 struct cr_bcphr_s {
-    const struct cr_bcphr_ops_s ops;
-    int blksz;
+	const struct cr_bcphr_ops_s ops;
+	int blksz;
 };
 
 int cr_bcphr_block_size(struct cr_bcphr_s *cipher);

@@ -1,5 +1,5 @@
-TESTS = check_des check_otp check_randgen check_rc4
-check_PROGRAMS = check_des check_otp check_randgen check_rc4
+TESTS = check_des check_otp check_randgen check_rc4 check_tdea
+check_PROGRAMS = check_des check_otp check_randgen check_rc4 check_tdea
 
 check_des_SOURCES = crypt/check_des.c
 check_des_CFLAGS = $(CHECK_CFLAGS) -I$(top_srcdir)/src/crypt/include
@@ -16,5 +16,9 @@ check_randgen_LDADD = $(top_builddir)/src/crypt/libcrypt.la $(CHECK_LIBS)
 check_rc4_SOURCES = crypt/check_rc4.c
 check_rc4_CFLAGS = $(CHECK_CFLAGS) -I$(top_srcdir)/src/crypt/include
 check_rc4_LDADD = $(top_builddir)/src/crypt/libcrypt.la $(CHECK_LIBS)
+
+check_tdea_SOURCES = crypt/check_tdea.c
+check_tdea_CFLAGS = $(CHECK_CFLAGS) -I$(top_srcdir)/src/crypt/include
+check_tdea_LDADD = $(top_builddir)/src/crypt/libcrypt.la $(CHECK_LIBS)
 
 @VALGRIND_CHECK_RULES@
