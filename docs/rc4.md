@@ -21,9 +21,9 @@ XORing the ciphertext with the sequence will produce the plaintext
 back. There exist multiple cryptosystems based on this idea, and we
 will look at RC4.
 
-In this step, try implementing the `cr_rc4_*` function declared in the
-`src/crypt/include/crypt/stream.h` file.  The implementation must be
-inserted into the `src/crypt/stream.c` file.  Once you finished your
-implementation, the `check_rc4` testsuite should be passing. For your
-implementation, you might want to follow the description provided by
-the [Wikipedia page](https://en.wikipedia.org/wiki/RC4).
+In this step, try implementing the `cr_rc4_*` functions declared in
+the `src/crypt/include/crypt/stream.h` file.  The implementation must
+be inserted into the `src/crypt/stream.c` file.  Once you finished
+your implementation, the `check_rc4` testsuite should be passing. For
+your implementation, you might want to follow the description provided
+by the [Wikipedia page](https://en.wikipedia.org/wiki/RC4).

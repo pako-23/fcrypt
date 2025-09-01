@@ -1,7 +1,10 @@
 lib_LTLIBRARIES = libcrypt.la
 
-libcrypt_la_SOURCES = rand.c \
+libcrypt_la_SOURCES = des.c \
+	rand.c \
 	stream.c \
+	include/crypt/block.h \
+	include/crypt/des.h \
 	include/crypt/rand.h \
 	include/crypt/stream.h
 libcrypt_la_CFLAGS = -I$(abs_srcdir)/include $(CODE_COVERAGE_CFLAGS) -fPIC
