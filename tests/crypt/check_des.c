@@ -330,7 +330,7 @@ END_TEST START_TEST(encryption_decryption)
 	}
 }
 
-END_TEST Suite * hashset_suite(void)
+END_TEST Suite *hashset_suite(void)
 {
 	Suite *s;
 	TCase *tc_core;

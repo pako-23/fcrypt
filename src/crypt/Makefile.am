@@ -1,6 +1,7 @@
 lib_LTLIBRARIES = libcrypt.la
 
-libcrypt_la_SOURCES = des.c \
+libcrypt_la_SOURCES = block.c \
+	des.c \
 	rand.c \
 	stream.c \
 	include/crypt/block.h \
