@@ -8,6 +8,8 @@
 enum cr_bcphr_mode {
 	CR_BCPHR_ECB_MODE = 0x00,
 	CR_BCPHR_CBC_MODE = 0x01,
+	CR_BCPHR_CFB_MODE = 0x02,
+	CR_BCPHR_OFB_MODE = 0x03,
 };
 
 struct cr_bcphr_s;

@@ -25,14 +25,20 @@ static void ecb_decrypt(struct cr_bcphr_s *cipher, uint8_t * out);
 static void cbc_encrypt(struct cr_bcphr_s *cipher, uint8_t * out);
 static void cbc_decrypt(struct cr_bcphr_s *cipher, uint8_t * out);
 
+static void cfb_encrypt(struct cr_bcphr_s *cipher, uint8_t * out);
+static void cfb_decrypt(struct cr_bcphr_s *cipher, uint8_t * out);
+
+static void ofb_encrypt(struct cr_bcphr_s *cipher, uint8_t * out);
+static void ofb_decrypt(struct cr_bcphr_s *cipher, uint8_t * out);
+
 static void (*encypt_modes[])(struct cr_bcphr_s *, uint8_t *) = {
-	ecb_encrypt,
-	cbc_encrypt,
+	ecb_encrypt, cbc_encrypt, cfb_encrypt,
+	ofb_encrypt,
 };
 
 static void (*decrypt_modes[])(struct cr_bcphr_s *, uint8_t *) = {
-	ecb_decrypt,
-	cbc_decrypt,
+	ecb_decrypt, cbc_decrypt, cfb_decrypt,
+	ofb_decrypt,
 };
 
 struct cr_bcphr_s *cr_bcphr_new(const uint8_t *key,
@@ -229,4 +235,46 @@ static void cbc_decrypt(struct cr_bcphr_s *cipher, uint8_t *out)
 		out[j] ^= cipher->iv[j];
 
 	memcpy(cipher->iv, cipher->block, blksz);
+}
+
+static void cfb_encrypt(struct cr_bcphr_s *cipher, uint8_t *out)
+{
+	size_t blksz = cr_bcphr_block_size(cipher);
+
+	cipher->encrypt(cipher->iv, cipher->key, out);
+	for (size_t i = 0; i < blksz; ++i)
+		out[i] ^= cipher->block[i];
+
+	memcpy(cipher->iv, out, blksz);
+}
+
+static void cfb_decrypt(struct cr_bcphr_s *cipher, uint8_t *out)
+{
+	size_t blksz = cr_bcphr_block_size(cipher);
+
+	cipher->encrypt(cipher->iv, cipher->key, out);
+	memcpy(cipher->iv, cipher->block, blksz);
+	for (size_t i = 0; i < blksz; ++i)
+		out[i] ^= cipher->block[i];
+}
+
+static void ofb_encrypt(struct cr_bcphr_s *cipher, uint8_t *out)
+{
+	size_t blksz = cr_bcphr_block_size(cipher);
+
+	cipher->encrypt(cipher->iv, cipher->key, out);
+	memcpy(cipher->iv, out, blksz);
+
+	for (size_t i = 0; i < blksz; ++i)
+		out[i] ^= cipher->block[i];
+}
+
+static void ofb_decrypt(struct cr_bcphr_s *cipher, uint8_t *out)
+{
+	size_t blksz = cr_bcphr_block_size(cipher);
+
+	cipher->encrypt(cipher->iv, cipher->key, out);
+	memcpy(cipher->iv, out, blksz);
+	for (size_t i = 0; i < blksz; ++i)
+		out[i] ^= cipher->block[i];
 }
