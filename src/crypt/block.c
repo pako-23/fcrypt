@@ -1,5 +1,5 @@
-#include "crypt/des.h"
-#include "crypt/rand.h"
+#include <crypt/des.h>
+#include <crypt/rand.h>
 #include <crypt/block.h>
 #include <stddef.h>
 #include <stdint.h>
