@@ -1,5 +1,9 @@
-TESTS = check_des check_ecb check_otp check_randgen check_rc4 check_tdea
-check_PROGRAMS = check_des check_ecb check_otp check_randgen check_rc4 check_tdea
+TESTS = check_cbc check_des check_ecb check_otp check_randgen check_rc4 check_tdea
+check_PROGRAMS = check_cbc check_des check_ecb check_otp check_randgen check_rc4 check_tdea
+
+check_cbc_SOURCES = crypt/check_cbc.c
+check_cbc_CFLAGS = $(CHECK_CFLAGS) -I$(top_srcdir)/src/crypt/include
+check_cbc_LDADD = $(top_builddir)/src/crypt/libcrypt.la $(CHECK_LIBS)
 
 check_des_SOURCES = crypt/check_des.c
 check_des_CFLAGS = $(CHECK_CFLAGS) -I$(top_srcdir)/src/crypt/include

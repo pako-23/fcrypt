@@ -1,4 +1,5 @@
 #include "crypt/des.h"
+#include "crypt/rand.h"
 #include <crypt/block.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -18,19 +19,20 @@ struct cr_bcphr_s {
 	uint8_t *key;
 };
 
-static size_t ecb_encrypt(struct cr_bcphr_s *cipher, const uint8_t * plain,
-			  size_t len, uint8_t * out);
-static size_t ecb_decrypt(struct cr_bcphr_s *cipher, const uint8_t * plain,
-			  size_t len, uint8_t * out);
+static void ecb_encrypt(struct cr_bcphr_s *cipher, uint8_t * out);
+static void ecb_decrypt(struct cr_bcphr_s *cipher, uint8_t * out);
 
-static size_t (*encypt_modes[])(struct cr_bcphr_s *, const uint8_t *, size_t,
-				uint8_t *) = {
+static void cbc_encrypt(struct cr_bcphr_s *cipher, uint8_t * out);
+static void cbc_decrypt(struct cr_bcphr_s *cipher, uint8_t * out);
+
+static void (*encypt_modes[])(struct cr_bcphr_s *, uint8_t *) = {
 	ecb_encrypt,
+	cbc_encrypt,
 };
 
-static size_t (*decrypt_modes[])(struct cr_bcphr_s *, const uint8_t *, size_t,
-				 uint8_t *) = {
+static void (*decrypt_modes[])(struct cr_bcphr_s *, uint8_t *) = {
 	ecb_decrypt,
+	cbc_decrypt,
 };
 
 struct cr_bcphr_s *cr_bcphr_new(const uint8_t *key,
@@ -53,6 +55,9 @@ struct cr_bcphr_s *cr_bcphr_new(const uint8_t *key,
 	if (cipher->iv == NULL)
 		goto block_clean;
 
+	if (cr_rand_bytes(cipher->iv, blksz) != 0)
+		goto iv_clean;
+
 	cipher->key = malloc(keysz);
 	if (cipher->key == NULL)
 		goto iv_clean;
@@ -63,7 +68,6 @@ struct cr_bcphr_s *cr_bcphr_new(const uint8_t *key,
 	cipher->blksz = blksz;
 	cipher->keysz = keysz;
 	cipher->written = 0;
-	memset(cipher->iv, 0, blksz);
 	memcpy(cipher->key, key, keysz);
 
 	return cipher;
@@ -93,21 +97,64 @@ size_t cr_bcphr_block_size(const struct cr_bcphr_s *cipher)
 
 void cr_bcphr_set_iv(struct cr_bcphr_s *cipher, const uint8_t *iv)
 {
-	if (cipher->mode == CR_BCPHR_ECB_MODE)
-		return;
 	memcpy(cipher->iv, iv, cr_bcphr_block_size(cipher));
 }
 
 size_t cr_bcphr_encrypt(struct cr_bcphr_s *cipher, const uint8_t *plain,
 			size_t len, uint8_t *out)
 {
-	return encypt_modes[cipher->mode] (cipher, plain, len, out);
+	size_t blksz = cr_bcphr_block_size(cipher);
+	size_t blocks = (cipher->written + len) / blksz;
+
+	if (out == NULL)
+		return blocks * blksz;
+
+	for (size_t i = 0; i < blocks; ++i) {
+		size_t left = blksz - cipher->written;
+		memcpy(cipher->block + cipher->written, plain, left);
+
+		encypt_modes[cipher->mode] (cipher, out);
+
+		cipher->written = 0;
+		out += blksz;
+		len -= left;
+		plain += left;
+	}
+
+	memcpy(cipher->block, plain, len);
+	cipher->written = len;
+
+	return blocks * blksz;
 }
 
 size_t cr_bcphr_decrypt(struct cr_bcphr_s *cipher, const uint8_t *ctext,
 			size_t len, uint8_t *out)
 {
-	return decrypt_modes[cipher->mode] (cipher, ctext, len, out);
+	size_t blksz = cr_bcphr_block_size(cipher);
+	size_t blocks = (cipher->written + len) / blksz;
+
+	if (blocks * blksz == len)
+		blocks -= 1;
+
+	if (out == NULL)
+		return blocks * blksz;
+
+	for (size_t i = 0; i < blocks; ++i) {
+		size_t left = blksz - cipher->written;
+		memcpy(cipher->block + cipher->written, ctext, left);
+
+		decrypt_modes[cipher->mode] (cipher, out);
+		cipher->written = 0;
+
+		out += blksz;
+		len -= left;
+		ctext += left;
+	}
+
+	cipher->written = len;
+	memcpy(cipher->block, ctext, len);
+
+	return blocks * blksz;
 }
 
 void cr_bcphr_encrypt_finalize(struct cr_bcphr_s *cipher, uint8_t *out)
@@ -118,77 +165,27 @@ void cr_bcphr_encrypt_finalize(struct cr_bcphr_s *cipher, uint8_t *out)
 	while (cipher->written < blksz)
 		cipher->block[cipher->written++] = pad;
 
-	// TODO this is completely wrong since it does not use the iv yet
-
-	cipher->encrypt(cipher->block, cipher->key, out);
+	encypt_modes[cipher->mode] (cipher, out);
 }
 
 ssize_t cr_bcphr_decrypt_finalize(struct cr_bcphr_s *cipher, uint8_t *out)
 {
 	size_t blksz = cr_bcphr_block_size(cipher);
+	uint8_t pad;
 
 	if (cipher->written != blksz)
 		return -1;
 
-	cipher->decrypt(cipher->block, cipher->key, out);
-	// TODO this is completely wrong since it does not use the iv yet
+	decrypt_modes[cipher->mode] (cipher, out);
+	pad = out[blksz - 1];
+	if (pad > blksz)
+		return -1;
+
+	for (uint8_t i = 0; i < pad; ++i)
+		if (out[blksz - 1 - i] != pad)
+			return -1;
 
 	return blksz - out[blksz - 1];
-}
-
-static size_t ecb_encrypt(struct cr_bcphr_s *cipher, const uint8_t *plain,
-			  size_t len, uint8_t *out)
-{
-	size_t blksz = cr_bcphr_block_size(cipher);
-	size_t blocks = (cipher->written + len) / blksz;
-
-	if (out == NULL)
-		return blocks * blksz;
-
-	for (size_t i = 0; i < blocks; ++i) {
-		size_t left = blksz - cipher->written;
-		memcpy(cipher->block + cipher->written, plain, left);
-
-		cipher->encrypt(cipher->block, cipher->key, out);
-		cipher->written = 0;
-		out += blksz;
-		len -= left;
-		plain += left;
-	}
-
-	memcpy(cipher->block, plain, len);
-	cipher->written = len;
-
-	return blocks * blksz;
-}
-
-static size_t ecb_decrypt(struct cr_bcphr_s *cipher, const uint8_t *plain,
-			  size_t len, uint8_t *out)
-{
-	size_t blksz = cr_bcphr_block_size(cipher);
-	size_t blocks = (cipher->written + len) / blksz;
-
-	if (blocks * blksz == len)
-		blocks -= 1;
-	if (out == NULL)
-		return blocks * blksz;
-
-	for (size_t i = 0; i < blocks; ++i) {
-		size_t left = blksz - cipher->written;
-		memcpy(cipher->block + cipher->written, plain, left);
-
-		cipher->decrypt(cipher->block, cipher->key, out);
-		cipher->written = 0;
-
-		out += blksz;
-		len -= left;
-		plain += left;
-	}
-
-	cipher->written = len;
-	memcpy(cipher->block, plain, len);
-
-	return blocks * blksz;
 }
 
 struct cr_bcphr_s *cr_bcphr_des(const uint8_t *key, enum cr_bcphr_mode mode)
@@ -199,4 +196,37 @@ struct cr_bcphr_s *cr_bcphr_des(const uint8_t *key, enum cr_bcphr_mode mode)
 struct cr_bcphr_s *cr_bcphr_tdea(const uint8_t *key, enum cr_bcphr_mode mode)
 {
 	return cr_bcphr_new(key, 24, 8, cr_tdea_encrypt, cr_tdea_decrypt, mode);
+}
+
+static void ecb_encrypt(struct cr_bcphr_s *cipher, uint8_t *out)
+{
+	cipher->encrypt(cipher->block, cipher->key, out);
+}
+
+static void ecb_decrypt(struct cr_bcphr_s *cipher, uint8_t *out)
+{
+	cipher->decrypt(cipher->block, cipher->key, out);
+}
+
+static void cbc_encrypt(struct cr_bcphr_s *cipher, uint8_t *out)
+{
+	size_t blksz = cr_bcphr_block_size(cipher);
+
+	for (size_t j = 0; j < blksz; ++j)
+		cipher->block[j] ^= cipher->iv[j];
+
+	cipher->encrypt(cipher->block, cipher->key, out);
+	memcpy(cipher->iv, out, blksz);
+}
+
+static void cbc_decrypt(struct cr_bcphr_s *cipher, uint8_t *out)
+{
+	size_t blksz = cr_bcphr_block_size(cipher);
+
+	cipher->decrypt(cipher->block, cipher->key, out);
+
+	for (size_t j = 0; j < blksz; ++j)
+		out[j] ^= cipher->iv[j];
+
+	memcpy(cipher->iv, cipher->block, blksz);
 }
