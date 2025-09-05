@@ -5,7 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-START_TEST(encryption_1)
+START_TEST(constants)
+{
+	ck_assert_int_eq(tdea_blksz, 8);
+	ck_assert_int_eq(tdea_keysz, 24);
+}
+
+END_TEST START_TEST(encryption_1)
 {
 	const uint8_t key[] =
 	    { 0xd4, 0x28, 0xa4, 0x65, 0xda, 0xa8, 0x3, 0xa1, 0x86, 0xd6, 0xd7,
@@ -457,6 +463,8 @@ END_TEST Suite *hashset_suite(void)
 	s = suite_create("TDEA");
 
 	tc_core = tcase_create("Core");
+
+	tcase_add_test(tc_core, constants);
 
 	tcase_add_test(tc_core, encryption_1);
 	tcase_add_test(tc_core, encryption_2);

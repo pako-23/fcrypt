@@ -1,5 +1,23 @@
-TESTS = check_cbc check_cfb check_des check_ecb check_ofb check_otp check_randgen check_rc4 check_tdea
-check_PROGRAMS = check_cbc check_cfb check_des check_ecb check_ofb check_otp check_randgen check_rc4 check_tdea
+TESTS = check_cbc \
+	check_cfb \
+	check_des \
+	check_ecb \
+	check_fcrypt \
+	check_ofb \
+	check_otp \
+	check_randgen \
+	check_rc4 \
+	check_tdea
+check_PROGRAMS = check_cbc \
+	check_cfb \
+	check_des \
+	check_ecb \
+	check_fcrypt \
+	check_ofb \
+	check_otp \
+	check_randgen \
+	check_rc4 \
+	check_tdea
 
 check_cbc_SOURCES = crypt/check_cbc.c
 check_cbc_CFLAGS = $(CHECK_CFLAGS) -I$(top_srcdir)/src/crypt/include
@@ -16,6 +34,14 @@ check_des_LDADD = $(top_builddir)/src/crypt/libcrypt.la $(CHECK_LIBS)
 check_ecb_SOURCES = crypt/check_ecb.c
 check_ecb_CFLAGS = $(CHECK_CFLAGS) -I$(top_srcdir)/src/crypt/include
 check_ecb_LDADD = $(top_builddir)/src/crypt/libcrypt.la $(CHECK_LIBS)
+
+check_fcrypt_SOURCES = check_fcrypt.c
+check_fcrypt_CFLAGS = $(CHECK_CFLAGS) \
+	-I$(top_srcdir)/src/include \
+	-I$(top_srcdir)/src/crypt/include
+check_fcrypt_LDADD = $(top_builddir)/src/libfcrypt.la \
+	$(top_builddir)/src/crypt/libcrypt.la \
+	$(CHECK_LIBS)
 
 check_ofb_SOURCES = crypt/check_ofb.c
 check_ofb_CFLAGS = $(CHECK_CFLAGS) -I$(top_srcdir)/src/crypt/include

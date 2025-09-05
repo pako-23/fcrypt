@@ -3,6 +3,11 @@
 #include <stdint.h>
 #include <string.h>
 
+const size_t des_blksz = 8;
+const size_t tdea_blksz = 8;
+const size_t des_keysz = 8;
+const size_t tdea_keysz = 24;
+
 #define GET_BIT(array, bit)                     \
     (array[bit/8] & (0x80 >> (bit%8)))
 

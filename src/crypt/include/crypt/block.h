@@ -28,6 +28,8 @@ void cr_bcphr_destroy(struct cr_bcphr_s *cipher);
 
 size_t cr_bcphr_block_size(const struct cr_bcphr_s *cipher);
 void cr_bcphr_set_iv(struct cr_bcphr_s *cipher, const uint8_t * iv);
+size_t cr_bcphr_get_iv(const struct cr_bcphr_s *cipher, uint8_t * iv);
+enum cr_bcphr_mode cr_bcphr_get_mode(const struct cr_bcphr_s *cipher);
 
 size_t cr_bcphr_encrypt(struct cr_bcphr_s *cipher, const uint8_t * plain,
 			size_t len, uint8_t * out);

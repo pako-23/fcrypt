@@ -5,7 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-START_TEST(encryption_1)
+START_TEST(constants)
+{
+	ck_assert_int_eq(des_blksz, 8);
+	ck_assert_int_eq(des_keysz, 8);
+}
+
+END_TEST START_TEST(encryption_1)
 {
 	const uint8_t key[] =
 	    { 0x0f, 0x15, 0x71, 0xc9, 0x47, 0xd9, 0xe8, 0x59 };
@@ -338,6 +344,8 @@ END_TEST Suite *hashset_suite(void)
 	s = suite_create("DES");
 
 	tc_core = tcase_create("Core");
+
+	tcase_add_test(tc_core, constants);
 
 	tcase_add_test(tc_core, encryption_1);
 	tcase_add_test(tc_core, encryption_2);

@@ -106,6 +106,19 @@ void cr_bcphr_set_iv(struct cr_bcphr_s *cipher, const uint8_t *iv)
 	memcpy(cipher->iv, iv, cr_bcphr_block_size(cipher));
 }
 
+size_t cr_bcphr_get_iv(const struct cr_bcphr_s *cipher, uint8_t *iv)
+{
+	size_t blksz = cr_bcphr_block_size(cipher);
+
+	memcpy(iv, cipher->iv, blksz);
+	return blksz;
+}
+
+enum cr_bcphr_mode cr_bcphr_get_mode(const struct cr_bcphr_s *cipher)
+{
+	return cipher->mode;
+}
+
 size_t cr_bcphr_encrypt(struct cr_bcphr_s *cipher, const uint8_t *plain,
 			size_t len, uint8_t *out)
 {
@@ -196,12 +209,14 @@ ssize_t cr_bcphr_decrypt_finalize(struct cr_bcphr_s *cipher, uint8_t *out)
 
 struct cr_bcphr_s *cr_bcphr_des(const uint8_t *key, enum cr_bcphr_mode mode)
 {
-	return cr_bcphr_new(key, 8, 8, cr_des_encrypt, cr_des_decrypt, mode);
+	return cr_bcphr_new(key, des_keysz, des_blksz, cr_des_encrypt,
+			    cr_des_decrypt, mode);
 }
 
 struct cr_bcphr_s *cr_bcphr_tdea(const uint8_t *key, enum cr_bcphr_mode mode)
 {
-	return cr_bcphr_new(key, 24, 8, cr_tdea_encrypt, cr_tdea_decrypt, mode);
+	return cr_bcphr_new(key, tdea_keysz, tdea_blksz, cr_tdea_encrypt,
+			    cr_tdea_decrypt, mode);
 }
 
 static void ecb_encrypt(struct cr_bcphr_s *cipher, uint8_t *out)

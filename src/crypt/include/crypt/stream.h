@@ -9,7 +9,7 @@ struct cr_rc4_s;
 void cr_otp(const unsigned char *in, const unsigned char *key,
 	    unsigned char *out, size_t len);
 
-struct cr_rc4_s *cr_rc4_new(uint8_t * key, size_t len);
+struct cr_rc4_s *cr_rc4_new(const uint8_t * key, size_t len);
 void cr_rc4_destroy(struct cr_rc4_s *cipher);
 
 int cr_rc4_encrypt(struct cr_rc4_s *cipher, const uint8_t * plain, size_t len,

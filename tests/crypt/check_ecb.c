@@ -2,7 +2,20 @@
 #include <stdlib.h>
 #include <crypt/block.h>
 
-START_TEST(des_encrypt_nullout_10)
+START_TEST(block_cipher_ecb_init)
+{
+	struct cr_bcphr_s *cipher;
+	const uint8_t key[] =
+	    { 0x32, 0x33, 0x19, 0x3e, 0xf8, 0x5c, 0x20, 0xbb };
+
+	cipher = cr_bcphr_des(key, CR_BCPHR_ECB_MODE);
+	ck_assert_ptr_nonnull(cipher);
+
+	ck_assert_int_eq(cr_bcphr_get_mode(cipher), CR_BCPHR_ECB_MODE);
+	cr_bcphr_destroy(cipher);
+}
+
+END_TEST START_TEST(des_encrypt_nullout_10)
 {
 	struct cr_bcphr_s *cipher;
 	const uint8_t key[] =
@@ -1008,6 +1021,10 @@ END_TEST Suite *hashset_suite(void)
 	TCase *tc;
 
 	s = suite_create("ECB");
+
+	tc = tcase_create("Setup");
+	tcase_add_test(tc, block_cipher_ecb_init);
+	suite_add_tcase(s, tc);
 
 	tc = tcase_create("Encrypt");
 	tcase_add_test(tc, des_encrypt_nullout_10);

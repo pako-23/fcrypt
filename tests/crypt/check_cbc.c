@@ -1,8 +1,50 @@
+#include <crypt/des.h>
 #include <check.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <crypt/block.h>
 
-START_TEST(des_encrypt_nullout_20)
+START_TEST(block_cipher_cbc_init)
+{
+	struct cr_bcphr_s *c1, *c2;
+	const uint8_t key[] =
+	    { 0x32, 0x33, 0x19, 0x3e, 0xf8, 0x5c, 0x20, 0xbb };
+	uint8_t iv1[des_blksz], iv2[des_blksz];
+
+	c1 = cr_bcphr_des(key, CR_BCPHR_CBC_MODE);
+	ck_assert_ptr_nonnull(c1);
+	c2 = cr_bcphr_des(key, CR_BCPHR_CBC_MODE);
+	ck_assert_ptr_nonnull(c2);
+
+	ck_assert_int_eq(cr_bcphr_get_iv(c1, iv1), cr_bcphr_block_size(c1));
+	ck_assert_int_eq(cr_bcphr_get_iv(c2, iv2), cr_bcphr_block_size(c2));
+	ck_assert_mem_ne(iv1, iv2, des_blksz);
+	ck_assert_int_eq(cr_bcphr_get_mode(c1), CR_BCPHR_CBC_MODE);
+	cr_bcphr_destroy(c1);
+	cr_bcphr_destroy(c2);
+}
+
+END_TEST START_TEST(block_cipher_cbc_set_iv)
+{
+	struct cr_bcphr_s *cipher;
+	const uint8_t key[] =
+	    { 0x32, 0x33, 0x19, 0x3e, 0xf8, 0x5c, 0x20, 0xbb };
+	const uint8_t expected[] = { 0x89, 0x1c, 0xbe, 0xe,
+		0xdd, 0xcd, 0xea, 0x9b
+	};
+	uint8_t iv[des_blksz];
+
+	cipher = cr_bcphr_des(key, CR_BCPHR_CBC_MODE);
+	ck_assert_ptr_nonnull(cipher);
+
+	cr_bcphr_set_iv(cipher, expected);
+	ck_assert_int_eq(cr_bcphr_get_iv(cipher, iv),
+			 cr_bcphr_block_size(cipher));
+	ck_assert_mem_eq(iv, expected, des_blksz);
+	cr_bcphr_destroy(cipher);
+}
+
+END_TEST START_TEST(des_encrypt_nullout_20)
 {
 	struct cr_bcphr_s *cipher;
 	const uint8_t key[] =
@@ -736,6 +778,11 @@ END_TEST Suite *hashset_suite(void)
 	TCase *tc;
 
 	s = suite_create("CBC");
+
+	tc = tcase_create("Setup");
+	tcase_add_test(tc, block_cipher_cbc_init);
+	tcase_add_test(tc, block_cipher_cbc_set_iv);
+	suite_add_tcase(s, tc);
 
 	tc = tcase_create("Encrypt");
 	tcase_add_test(tc, des_encrypt_nullout_20);

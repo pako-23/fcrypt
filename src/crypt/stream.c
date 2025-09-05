@@ -18,7 +18,7 @@ void cr_otp(const unsigned char *in, const unsigned char *key,
 		*out++ = *in++ ^ *key++;
 }
 
-struct cr_rc4_s *cr_rc4_new(uint8_t *key, size_t len)
+struct cr_rc4_s *cr_rc4_new(const uint8_t *key, size_t len)
 {
 	struct cr_rc4_s *cipher;
 	int j, i;
