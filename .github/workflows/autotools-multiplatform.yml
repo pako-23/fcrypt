@@ -28,6 +28,11 @@ jobs:
             compiler: clang
           - os: macos-15
             compiler: clang
+        exclude:
+          - os: macos-14
+            compiler: gcc
+          - os: macos-15
+            compiler: gcc
 
     steps:
     - uses: actions/checkout@v4
@@ -47,7 +52,7 @@ jobs:
     - name: Setup packages
       if: runner.os == 'macOS'
       run: |
-        brew install check
+        brew install autoconf automake check libtool
 
     - name: Configure
       run: |
