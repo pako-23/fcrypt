@@ -1,0 +1,50 @@
+---
+name: Autotools on multiple platforms
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        os: [ubuntu-24.04]
+        compiler: [gcc, clang]
+        include:
+          - os: ubuntu-24.04
+            compiler: gcc
+          - os: ubuntu-24.04
+            compiler: clang
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+    - name: Configure
+      run: |
+        ./bootstrap.sh
+        mkdir ${{ steps.strings.outputs.build-output-dir }}
+        cd ${{ steps.strings.outputs.build-output-dir }}
+        ../configure CC=${{ matrix.compiler }}
+
+    - name: Build
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      run: make
+
+    - name: Test
+      working-directory: ${{ steps.strings.outputs.build-output-dir }}
+      run: make check
