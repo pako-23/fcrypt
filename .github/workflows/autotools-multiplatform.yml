@@ -34,6 +34,10 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Setup packages
+      run: |
+        sudo apt-get install check
+
     - name: Configure
       run: |
         ./bootstrap.sh
