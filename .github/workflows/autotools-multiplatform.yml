@@ -46,7 +46,6 @@ jobs:
     - name: Setup packages
       if: runner.os == 'Linux'
       run: |
-        sudo apt-get update
         sudo apt-get install -y check
 
     - name: Setup packages
