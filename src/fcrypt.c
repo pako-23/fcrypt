@@ -1,5 +1,4 @@
-#include "crypt/des.h"
-#include <bits/getopt_core.h>
+#include <crypt/des.h>
 #include <crypt/block.h>
 #include <crypt/rand.h>
 #include <crypt/stream.h>
