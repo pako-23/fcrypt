@@ -17,12 +17,16 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-24.04]
+        os: [ubuntu-24.04, macos-14, macos-15]
         compiler: [gcc, clang]
         include:
           - os: ubuntu-24.04
             compiler: gcc
           - os: ubuntu-24.04
+            compiler: clang
+          - os: macos-14
+            compiler: clang
+          - os: macos-15
             compiler: clang
 
     steps:
@@ -35,8 +39,15 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
     - name: Setup packages
+      if: runner.os == 'Linux'
       run: |
-        sudo apt-get install check
+        sudo apt-get update
+        sudo apt-get install -y check
+
+    - name: Setup packages
+      if: runner.os == 'macOS'
+      run: |
+        brew install check
 
     - name: Configure
       run: |
